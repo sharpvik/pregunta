@@ -7,18 +7,19 @@
 <script>
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../fire/config";
+import { useUserStore } from "../stores/users";
 
 export default {
   data() {
     return {
       errorMessage: null,
+      userStore: useUserStore(),
     };
   },
 
   methods: {
     signInWithGoogle() {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).catch((error) => {
+      signInWithPopup(auth, new GoogleAuthProvider()).catch((error) => {
         this.errorMessage = error.message;
       });
     },
@@ -26,8 +27,10 @@ export default {
 
   mounted() {
     auth.onAuthStateChanged((user) => {
-      if (user) console.log("User signed in:", user);
-      else console.log("User signed out");
+      if (user) {
+        this.userStore.login(user);
+        console.log("User signed in:", this.userStore.user);
+      } else console.log("User signed out");
     });
   },
 };
